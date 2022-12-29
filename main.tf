@@ -1,11 +1,18 @@
+ adc-lb = {
+    name           = var.adc-lb.name
+    type           = var.adc-lb.type
+	  port           = var.adc-lb.port
+	  backend-server = var.adc-lb.backend-server
+  }
+
 #####
 # Add LB Server
 #####
 
 resource "citrixadc_server" "lb_server" {
-  count     = length(var.adc-lb-server.name)
-  name      = element(var.adc-lb-server["name"],count.index)
-  ipaddress = element(var.adc-lb-server["ip"],count.index)
+  count     = length(var.adc-lb.name)
+  name      = "lb_srv_" + element(var.adc-lb["name"],count.index)
+  ipaddress = element(var.adc-lb["ip"],count.index)
 }
 
 #####
@@ -13,9 +20,9 @@ resource "citrixadc_server" "lb_server" {
 #####
 
 resource "citrixadc_servicegroup" "lb_servicegroup" {
-  count             = length(var.adc-lb-servicegroup.servicegroupname)
-  servicegroupname  = element(var.adc-lb-servicegroup["servicegroupname"],count.index)
-  servicetype       = element(var.adc-lb-servicegroup["servicetype"],count.index)
+  count             = length(var.adc-lb.name)
+  servicegroupname  = "lb_sg_" + element(var.adc-lb["name"],count.index) + "_" + element(var.adc-lb["type"],count.index) + "_" + element(var.adc-lb["port"],count.index)
+  servicetype       = element(var.adc-lb["type"],count.index)
 
   depends_on = [
     citrixadc_server.lb_server
@@ -27,10 +34,10 @@ resource "citrixadc_servicegroup" "lb_servicegroup" {
 #####
 
 resource "citrixadc_servicegroup_servicegroupmember_binding" "lb_sg_server_binding" {
-  count             = length(var.adc-lb-sg-server-binding.servicegroupname)
-  servicegroupname  = element(var.adc-lb-sg-server-binding["servicegroupname"],count.index)
-  servername        = element(var.adc-lb-sg-server-binding["servername"],count.index)
-  port              = element(var.adc-lb-sg-server-binding["port"],count.index)
+  count             = length(var.adc-lb.name)
+  servicegroupname  = "lb_sg_" + element(var.adc-lb["name"],count.index) + "_" + element(var.adc-lb["type"],count.index) + "_" + element(var.adc-lb["port"],count.index)
+  servername        = "lb_srv_" + element(var.adc-lb["name"],count.index) + "_" + element(var.adc-lb["type"],count.index) + "_" + element(var.adc-lb["port"],count.index)
+  port              = element(var.adc-lb["port"],count.index)
 
   depends_on = [
     citrixadc_servicegroup.lb_servicegroup
@@ -42,11 +49,12 @@ resource "citrixadc_servicegroup_servicegroupmember_binding" "lb_sg_server_bindi
 #####
 
 resource "citrixadc_lbvserver" "lb_vserver_ssl" {
-  count   = length(var.adc-lb-vserver-ssl.name)
-  name    = element(var.adc-lb-vserver-ssl["name"],count.index)
+  count     = length(var.adc-lb.name)
+  name      = "lb_vs_" + element(var.adc-lb["name"],count.index) + "_" + element(var.adc-lb["type"],count.index) + "_" + element(var.adc-lb["port"],count.index)
 
-  servicetype = element(var.adc-lb-vserver-ssl["servicetype"],count.index)
-  sslprofile = element(var.adc-lb-vserver-ssl["sslprofile"],count.index)
+  servicetype = element(var.adc-lb["type"],count.index)
+  # sslprofile = element(var.adc-lb-vserver-ssl["sslprofile"],count.index) ? SSL 
+  sslprofile = ${element(var.adc-lb["type"],count.index) == SSL ? "ssl_prof_${var.adc-base.environmentname}" : NULL}
   ipv46 = element(var.adc-lb-vserver-ssl["ipv46"],count.index)
   port = element(var.adc-lb-vserver-ssl["port"],count.index)
   lbmethod = element(var.adc-lb-vserver-ssl["lbmethod"],count.index)
@@ -65,7 +73,7 @@ resource "citrixadc_lbvserver" "lb_vserver_ssl" {
 #####
 
 resource "citrixadc_lbvserver" "lb_vserver_dns" {
-  count   = length(var.adc-lb-vserver-notssl.name)
+  count     = length(var.adc-lb.name)
   name    = element(var.adc-lb-vserver-notssl["name"],count.index)
 
   servicetype = element(var.adc-lb-vserver-notssl["servicetype"],count.index)
@@ -85,7 +93,7 @@ resource "citrixadc_lbvserver" "lb_vserver_dns" {
 #####
 
 resource "citrixadc_lbvserver_servicegroup_binding" "lb_vserver_sg_binding" {
-  count             = length(var.adc-lb-vserver-sg-binding.name)
+  count     = length(var.adc-lb.name)
   name              = element(var.adc-lb-vserver-sg-binding["name"],count.index)
   servicegroupname  = element(var.adc-lb-vserver-sg-binding["servicegroupname"],count.index)
 
@@ -100,7 +108,7 @@ resource "citrixadc_lbvserver_servicegroup_binding" "lb_vserver_sg_binding" {
 #####
 
 resource "citrixadc_sslvserver_sslcertkey_binding" "lb_sslvserver_sslcertkey_binding" {
-  count       = length(var.adc-lb-vserver-ssl.name)
+  count     = length(var.adc-lb.name)
   vservername = element(var.adc-lb-vserver-ssl["name"],count.index)
   certkeyname = "ssl_cert_democloud"
   snicert     = false

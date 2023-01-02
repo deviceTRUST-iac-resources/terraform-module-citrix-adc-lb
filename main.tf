@@ -1,12 +1,5 @@
- adc-lb = {
-    name           = var.adc-lb.name
-    type           = var.adc-lb.type
-	  port           = var.adc-lb.port
-	  backend-server = var.adc-lb.backend-server
-  }
-
 #####
-# Add LB Server
+# Add LB Server SSL
 #####
 
 resource "citrixadc_server" "lb_server" {

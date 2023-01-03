@@ -9,3 +9,4 @@ variable adc-base {}
 #####
 
 variable "adc-lb" {}
+variable "adc-lb-srv" {}

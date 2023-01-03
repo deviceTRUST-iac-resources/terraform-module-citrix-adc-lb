@@ -16,9 +16,9 @@ locals {
 #####
 
 resource "citrixadc_server" "lb_server" {
-  count     = length(var.adc-lb.name)
-  name      = "lb_srv_${element(var.adc-lb["name"],count.index)}"
-  ipaddress = element(var.adc-lb["backend-server"],count.index)
+  count     = length(var.adc-lb-srv.name)
+  name      = "lb_srv_${element(var.adc-lb-srv["name"],count.index)}"
+  ipaddress = element(var.adc-lb-srv["ip"],count.index)
 }
 
 #####

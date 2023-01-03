@@ -115,3 +115,18 @@ resource "citrixadc_nsconfig_save" "lb_save" {
       citrixadc_lbvserver_servicegroup_binding.lb_vserver_sg_binding
   ]
 }
+
+#####
+# Wait for config save to commence properly, before allowing the subsequent module to run.
+#####
+
+
+resource "time_sleep" "lb_wait" {
+
+  create_duration = "5s"
+
+  depends_on = [
+    citrixadc_nsconfig_save.lb_save
+  ]
+
+}

@@ -89,21 +89,6 @@ resource "citrixadc_lbvserver_servicegroup_binding" "lb_vserver_sg_binding" {
 }
 
 #####
-# Bind SSL certificate to SSL LB vServers
-#####
-
-#resource "citrixadc_sslvserver_sslcertkey_binding" "lb_sslvserver_sslcertkey_binding" {
-#  count       = length(var.adc-lb.name)
-#  vservername = element(var.adc-lb["type"],count.index) == "SSL" ?  "lb_vs_${element(var.adc-lb["name"],count.index)}_${element(var.adc-lb["type"],count.index)}_${element(var.adc-lb["port"],count.index)}" : null
-#  certkeyname = element(var.adc-lb["type"],count.index) == "SSL" ? local.sslcertkeyname : null
-#  snicert     = element(var.adc-lb["type"],count.index) == local.sslsnicert ? "false" : null
-
-#  depends_on = [
-#    citrixadc_lbvserver_servicegroup_binding.lb_vserver_sg_binding
-#  ]
-#}
-
-#####
 # Save config
 #####
 

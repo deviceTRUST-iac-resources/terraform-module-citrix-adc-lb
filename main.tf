@@ -1,5 +1,11 @@
+locals {
+  httpprofilename = "http_prof_${var.adc-base.environmentname}"
+  tcpprofilename  = "tcp_prof_${var.adc-base.environmentname}"
+  sslprofilename  = "ssl_prof_${var.adc-base.environmentname}_fe_TLS1213"
+}
+
 #####
-# Add LB Server SSL
+# Add LB Server
 #####
 resource "citrixadc_server" "lb_server" {
   count     = length(var.adc-lb-srv.name)
@@ -35,7 +41,7 @@ resource "citrixadc_servicegroup_servicegroupmember_binding" "lb_sg_server_bindi
 }
 
 #####
-# Add and configure LB vServer - Type SSL
+# Add and configure LB vServer
 #####
 resource "citrixadc_lbvserver" "lb_vserver" {
   count           = length(var.adc-lb.name)
@@ -47,9 +53,9 @@ resource "citrixadc_lbvserver" "lb_vserver" {
   lbmethod        = var.adc-lb-generic.lbmethod
   persistencetype = var.adc-lb-generic.persistencetype
   timeout         = var.adc-lb-generic.timeout
-  sslprofile      = element(var.adc-lb["type"],count.index) == "SSL" ? var.adc-lb-generic.sslprofilename : null
-  httpprofilename = element(var.adc-lb["type"],count.index) == "DNS" || element(var.adc-lb["type"],count.index) == "TCP" ? null : var.adc-lb-generic.httpprofilename
-  tcpprofilename  = element(var.adc-lb["type"],count.index) == "DNS" ? null : var.adc-lb-generic.tcpprofilename
+  sslprofile      = element(var.adc-lb["type"],count.index) == "SSL" ? local.sslprofilename : null
+  httpprofilename = element(var.adc-lb["type"],count.index) == "DNS" || element(var.adc-lb["type"],count.index) == "TCP" ? null : local.httpprofilename
+  tcpprofilename  = element(var.adc-lb["type"],count.index) == "DNS" ? null : local.tcpprofilename
 
   depends_on = [
     citrixadc_servicegroup_servicegroupmember_binding.lb_sg_server_binding

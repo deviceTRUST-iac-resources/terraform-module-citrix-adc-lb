@@ -8,4 +8,4 @@ variable adc-base {}
 #####
 variable "adc-lb" {}
 variable "adc-lb-srv" {}
-variable "adc-lb-generic" {}
+variable "adc-lb-gen" {}
